@@ -14,13 +14,13 @@
             [taoensso.timbre.appenders.core :as appenders])
   (:gen-class))
 
-(def http-port 3000)
 (def daemon-log "know-the-flow.log")
 (def txn-log "know-the-flow.txn")
 
 (timbre/merge-config!
  {:timestamp-opts {:pattern "yyyy-MM-dd HH:mm:ss ZZ"}
-  :appenders {:spit (appenders/spit-appender {:fname daemon-log})}})
+  :appenders {:spit (appenders/spit-appender {:fname daemon-log})}
+  :output-fn (partial timbre/default-output-fn {:stacktrace-fonts {}})})
 
 (timbre/set-level! :info)
 
@@ -39,7 +39,7 @@
   (PUT "/cask/:vol"   [vol]   (handler/update-cask api-c vol))
   (route/not-found "Page not found"))
 
-(defn -main [tty]
+(defn -main [tty http-port]
   (info "Starting know-the-flow server")
 
   ;;
@@ -59,4 +59,4 @@
   (-> api
       (wrap-json-response)
       (wrap-defaults api-defaults)
-      (jetty/run-jetty {:port http-port})))
+      (jetty/run-jetty {:port (Integer/parseInt http-port)})))
