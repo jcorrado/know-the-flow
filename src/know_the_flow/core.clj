@@ -16,6 +16,7 @@
 
 (def daemon-log "know-the-flow.log")
 (def txn-log "know-the-flow.txn")
+(def new-cask-threshold 300)
 
 (timbre/merge-config!
  {:timestamp-opts {:pattern "yyyy-MM-dd HH:mm:ss ZZ"}
@@ -34,7 +35,7 @@
 ;; API routes
 ;;
 (defroutes api
-  (GET "/cask"        []      (handler/remaining cask))
+  (GET "/cask"        []      (handler/remaining cask new-cask-threshold))
   (GET "/cask/:since" [since] (handler/consumed-since cask since))
   (PUT "/cask/:vol"   [vol]   (handler/update-cask api-c vol))
   (route/not-found "Page not found"))

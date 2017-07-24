@@ -9,9 +9,12 @@
       (r/response)
       (r/content-type "application/json")))
 
-(defn remaining [cask]
-  (fmt-response {:capacity (cask/capacity cask)
-                 :remaining (cask/remaining cask)}))
+(defn remaining [cask new-cask-threshold]
+  (let [capacity (cask/capacity cask)
+        consumed (cask/consumed-since cask 0)]
+    (if (< consumed  new-cask-threshold)
+      (fmt-response {:capacity capacity :remaining 0})
+      (fmt-response {:capacity capacity :remaining (cask/remaining cask)}))))
 
 (defn consumed-since [cask since]
   (let [since (Integer/parseInt since)]
