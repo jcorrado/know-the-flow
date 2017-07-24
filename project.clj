@@ -1,4 +1,4 @@
-(defproject know-the-flow "0.2.0-SNAPSHOT"
+(defproject know-the-flow "0.3.0-SNAPSHOT"
   :description "Know The Flow"
   :url "https://github.com/jcorrado/know-the-flow"
   :license {:name "Eclipse Public License"
