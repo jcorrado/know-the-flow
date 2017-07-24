@@ -1,6 +1,6 @@
 (ns know-the-flow.core
   (:require [know-the-flow.serial :refer [init-port parse-ser]]
-            [know-the-flow.cask :refer [create-cask update-cask]]
+            [know-the-flow.cask :refer [create-cask update-cask capacity remaining]]
             [know-the-flow.util :refer [gallons-to-liters write-txn]]
             [know-the-flow.handler :as handler]
             [clojure.core.async :refer [go-loop chan >! <! >!! <!! put! take! alts!]]
@@ -50,8 +50,10 @@
     (go-loop []
       (let [[msg _] (alts! [ser-c api-c])]
         (info "update event:" msg)
+        (write-txn txn-log msg)
         (update-cask cask msg)
-        (write-txn txn-log msg))
+        (info (str "cask state: " (remaining cask) "/" (capacity cask)))
+        )
       (recur)))
 
   ;;
