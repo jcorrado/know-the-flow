@@ -1,0 +1,23 @@
+To test without an Arduino and flow meter
+
+Use socat(1) to emulate a pty, then start KTF with this port.  Paste
+Arduino protocol strings to socat STDIN:
+
+jereme@buttercup  Sun Jul 23 12:28:14-0400 (EDT) 
+~ $ socat -d -d STDIN PTY,link=/home/jereme/test-tty,b115200,echo=0
+2017/07/23 12:28:15 socat[19137] N using stdin for reading and writing
+2017/07/23 12:28:15 socat[19137] N PTY is /dev/pts/7
+2017/07/23 12:28:15 socat[19137] N starting data transfer loop with FDs [0,0] and [5,5]
+P;0;8;1241
+K;0;8
+
+jereme@buttercup  Sun Jul 23 12:26:36-0400 (EDT) 
+~/projects/learning-clojure/know-the-flow (master) $ lein run /home/jereme/test-tty
+17-07-23 16:28:27 buttercup DEBUG [org.eclipse.jetty.util.log:176] - Logging to com.github.fzakaria.slf4j.timbre.TimbreLoggerAdapter@3437ff9c via org.eclipse.jetty.util.log.Slf4jLog
+17-07-23 16:28:27 buttercup INFO [org.eclipse.jetty.util.log:186] - Logging initialized @3479ms
+2017-07-23 16:28:28 +0000 buttercup INFO [know-the-flow.core:36] - Starting server
+2017-07-23 16:28:28 +0000 buttercup INFO [org.eclipse.jetty.server.Server:327] - jetty-9.2.21.v20170120
+2017-07-23 16:28:28 +0000 buttercup INFO [org.eclipse.jetty.server.ServerConnector:266] - Started ServerConnector@3e863303{HTTP/1.1}{0.0.0.0:3000}
+2017-07-23 16:28:28 +0000 buttercup INFO [org.eclipse.jetty.server.Server:379] - Started @4154ms
+2017-07-23 16:28:36 +0000 buttercup INFO [know-the-flow.core:44] - update event: #know_the_flow.cask.Msg{:ts 1500827316, :op :change, :ml 221, :src :meter}
+2017-07-23 16:28:36 +0000 buttercup INFO [know-the-flow.core:44] - update event: #know_the_flow.cask.Msg{:ts 1500827316, :op :reset, :ml 0, :src :meter}
