@@ -1,7 +1,7 @@
 (ns know-the-flow.core
   (:require [know-the-flow.serial :refer [init-port parse-ser]]
             [know-the-flow.cask :refer [create-cask update-cask]]
-            [know-the-flow.util :refer [gallons-to-liters]]
+            [know-the-flow.util :refer [gallons-to-liters write-txn]]
             [know-the-flow.handler :as handler]
             [clojure.core.async :refer [go-loop chan >! <! >!! <!! put! take! alts!]]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
@@ -17,6 +17,7 @@
 (timbre/set-level! :info)
 
 (def http-port 3000)
+(def txn-log "know-the-flow-txn.log")
 
 ;; our standard coldbrew keg is 5 gal.
 (def cask (create-cask (int (* 1000 (gallons-to-liters 5)))))
@@ -43,7 +44,8 @@
     (go-loop []
       (let [[msg _] (alts! [ser-c api-c])]
         (info "update event:" msg)
-        (update-cask cask msg))
+        (update-cask cask msg)
+        (write-txn txn-log msg))
       (recur)))
 
   ;;
