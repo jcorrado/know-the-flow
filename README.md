@@ -31,15 +31,17 @@ This endpoint is intended as an administrative interface, for adjusting the stat
 We define the starting capacity of our cask, and decrement capacity based on dispensation events, but this is *not* actually how we determine when the cask is empty.  Instead, our flow meter driver provides a "kicked" event.  If the system is incorrectly calibrated, we will continue to decrement our cask's capacity, past zero.  We make no attempt to handle this, instead logging events so that re-calibration can be investigated.  It is expected that API consumers will provide a strategy for sensibly surfacing this state to users.  Simple messaging like "Just about empty" would make sense.
 
 ### Determining when a cask has been replaced
-This is actually the hardest of the problems.  One of our design goals is a system that doesn't require operator, so we have to infer when a cask has been replaced.  Any simple heuristic is complicated by the fact that kick events are often followed by "ghost" dispensation events of small amounts.
+One of our design goals is a system that doesn't require operator intervention, so we have to infer when a cask has been replaced.  Any simple heuristic is complicated by the fact that kick events are often followed by "ghost" dispensation events of small amounts.
 
-Our strategy is, upon kick, we *immediately* reset a cask's capacity back to full.  However, our API will continue to report the cask as empty until ``new-cask-threshold`` (presently 300 ml) has been dispensed.  This helps avoid reporting a new cask, until it has truly been replaced, but means that there is no announcement of a new cask until someone takes the first cup.
+Our strategy is, upon kick, to *immediately* reset a cask's capacity to full.  However, our API will continue to report the cask as empty until ``new-cask-threshold`` (presently 300 ml) has been dispensed.  This helps avoid reporting a new cask, until it has truly been replaced, but also means that there is no announcement of a new cask until someone takes the first cup.
 
 
 ## Operations Notes
 
 ### Running The Daemon
-For now, the daemon should be run by hand.  Once packaged, a proper init solution will be furnished.  Run the uberjar, passing the serial pty and HTTP listening port.
+For now, the daemon should be run by hand.  Once packaged, a proper init solution will be provider.  
+
+Run the uberjar, passing the serial pty and HTTP listening port.
 ```
 pi@flow0:~ $ java -jar know-the-flow-0.2.0-standalone.jar /dev/ttyACM0 8080
 -07-24 03:54:21 flow0 DEBUG [org.eclipse.jetty.util.log:176] - Logging to com.github.fzakaria.slf4j.timbre.TimbreLoggerAdapter@cc3423 via org.eclipse.jetty.util.log.Slf4j
@@ -53,7 +55,7 @@ g
 
 ### Log Files
 * KTF log level is defined as ``info`` but can be make configurable if needed.  Logging is to STDOUT and ``know-the-flow.log`` in CWD from which the daemon was launched.
-* KTF also writes out ``know-the-flow.txn``, an EDN file used for state tracking between reboots of the daemon.
+* KTF also writes out ``know-the-flow.txn``, an EDN file used for state tracking between restarts of the daemon.
 
 ### Considerations On Restarting
 The state file ``know-the-flow.txn`` is written, but not currently used; a daemon restart means all state is lost.  For now, use the admin API to set state to the last capacity, as extracted from ``know-the-flow.log``.
