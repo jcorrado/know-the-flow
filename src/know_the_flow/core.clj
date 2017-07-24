@@ -10,14 +10,19 @@
             [ring.adapter.jetty :as jetty]
             [compojure.core :refer [defroutes GET PUT]]
             [compojure.route :as route]
-            [taoensso.timbre :as timbre :refer [info]])
+            [taoensso.timbre :as timbre :refer [info]]
+            [taoensso.timbre.appenders.core :as appenders])
   (:gen-class))
 
-(timbre/merge-config! {:timestamp-opts {:pattern "yyyy-MM-dd HH:mm:ss ZZ"}})
-(timbre/set-level! :info)
-
 (def http-port 3000)
-(def txn-log "know-the-flow-txn.log")
+(def daemon-log "know-the-flow.log")
+(def txn-log "know-the-flow.txn")
+
+(timbre/merge-config!
+ {:timestamp-opts {:pattern "yyyy-MM-dd HH:mm:ss ZZ"}
+  :appenders {:spit (appenders/spit-appender {:fname daemon-log})}})
+
+(timbre/set-level! :info)
 
 ;; our standard coldbrew keg is 5 gal.
 (def cask (create-cask (int (* 1000 (gallons-to-liters 5)))))
@@ -35,7 +40,7 @@
   (route/not-found "Page not found"))
 
 (defn -main [tty]
-  (info "Starting server")
+  (info "Starting know-the-flow server")
 
   ;;
   ;; process cask update events

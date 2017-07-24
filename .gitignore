@@ -9,3 +9,5 @@ pom.xml.asc
 /.nrepl-port
 .hgignore
 .hg/
+know-the-flow.log
+know-the-flow.txn
