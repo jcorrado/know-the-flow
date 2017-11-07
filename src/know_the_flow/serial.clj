@@ -34,28 +34,23 @@
             (assoc :ml ml)))
       msg)))
 
+(def serial-msg-xf
+  "Transducer: group bytes into raw messages, as defined by Arduino
+  serial protocol, and produce Msg records."
+  (comp
+   (filter #(not= \return %))
+   (partition-by #(= \newline %))
+   (map #(apply str %))
+   (filter #(not= "\n" %))
+   (map parse-proto-block)))
+
 (defn init-port
   "Setup callback for incoming bytes on serial port, returning a
   channel"
   ([tty]
    (init-port tty tty-speed))
   ([tty, speed]
-   (let [c (chan 1)
+   (let [c (chan 1 serial-msg-xf)
          port (serial/open tty :baud-rate tty-speed)]
      (serial/listen! port #(put! c (.read  %)))
      c)))
-
-;; This feels too iterative and clunky
-(defn parse-ser
-  "Read bytes off channel, group into raw messages, as defined by
-  Arduino serial protocol, return Msg record"
-  [in]
-  (let [out (chan)]
-    (go-loop [acc []]
-      (when-some [c (char (<! in))]
-        (cond
-          (= c \newline) (do (>! out (parse-proto-block (apply str acc)))
-                             (recur []))
-          (= c \return)  (recur acc)
-          :else          (recur (conj acc c)))))
-    out))

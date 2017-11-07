@@ -1,5 +1,5 @@
 (ns know-the-flow.core
-  (:require [know-the-flow.serial :refer [init-port parse-ser]]
+  (:require [know-the-flow.serial :refer [init-port]]
             [know-the-flow.cask :refer [create-cask update-cask capacity remaining]]
             [know-the-flow.util :refer [gallons-to-liters write-txn]]
             [know-the-flow.handler :as handler]
@@ -46,7 +46,7 @@
   ;;
   ;; process cask update events
   ;;
-  (let [ser-c (parse-ser (init-port tty))]
+  (let [ser-c (init-port tty)]
     (go-loop []
       (let [[msg _] (alts! [ser-c api-c])]
         (info "update event:" msg)
