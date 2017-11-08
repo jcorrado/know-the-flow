@@ -38,6 +38,7 @@
   "Transducer: group bytes into raw messages, as defined by Arduino
   serial protocol, and produce Msg records."
   (comp
+   (map char)
    (filter #(not= \return %))
    (partition-by #(= \newline %))
    (map #(apply str %))
