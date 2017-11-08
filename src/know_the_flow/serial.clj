@@ -52,6 +52,6 @@
    (init-port tty tty-speed))
   ([tty, speed]
    (let [c (chan 1 serial-msg-xf)
-         port (serial/open tty :baud-rate tty-speed)]
+         port (serial/open tty :baud-rate speed)]
      (serial/listen! port #(put! c (.read  %)))
      c)))
